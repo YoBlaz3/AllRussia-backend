@@ -1,9 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for, session, send_from_directory, jsonify, send_file, flash
 from flask_paginate import Pagination, get_page_args
-<<<<<<< HEAD
 from database import Database
-=======
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
 from flask_jwt_extended import *
 import pathlib, hashlib, datetime
 from get_data import get_data_app
@@ -17,12 +14,7 @@ import uuid
 from flask_cors import CORS
 from database import database
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
 app = Flask(__name__, template_folder="templates")
-
 
 CORS(app)
 app.secret_key = 'all_russia'
@@ -31,16 +23,16 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(weeks=2)
 jwt = JWTManager(app)
-<<<<<<< HEAD
+
 app.register_blueprint(get_data_app)
 
 # Путь к изображениям
-=======
+
 app.register_blueprint(get_data_app, url_prefix='/api')
 SMARTCAPTCHA_SERVER_KEY = os.getenv('SMARTCAPTCHA_SERVER_KEY')
 SMARTCAPTCHA_CLIENT_KEY = os.getenv('SMARTCAPTCHA_CLIENT_KEY')
 
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
+
 UPLOAD_FOLDER = str(pathlib.Path(__file__).parent.resolve()) + "/public"
 
 table_names = {
@@ -61,13 +53,11 @@ def expired_token(*args):
     return resp
 
 
-<<<<<<< HEAD
-# Генерация текста капчи
 def generate_captcha_text(length=5):
     return ''.join(random.choices(string.ascii_lowercase, k=length))
 
 
-# Маршрут для изображения капчи
+
 @app.route('/captcha_image')
 def captcha_image():
     captcha_text = generate_captcha_text()
@@ -79,7 +69,7 @@ def captcha_image():
 
 # Страница для входа в админ-панель
 @app.route('/admin_login', methods=['GET', 'POST'])
-=======
+
 @app.route('/api/upload_image', methods=['POST'])
 @jwt_required()
 def upload_image():
@@ -116,7 +106,7 @@ def verifyExt(filename):
 
 
 @app.route('/api/admin_login', methods=['GET', 'POST'])
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
+
 @jwt_required(optional=True)
 def admin_login():
     error = None
@@ -124,7 +114,7 @@ def admin_login():
     if jwt_data and jwt_data.get("fresh", False):
         return redirect(url_for('admin_panel'))
 
-<<<<<<< HEAD
+
     if request.method == 'POST':
         # Имя пользователя и пароль
         username = request.form['username']
@@ -137,7 +127,7 @@ def admin_login():
             return redirect(url_for('admin_login'))
 
         # Проверка пользователя
-=======
+
     if request.method == 'GET':
         return render_template('admin_login.html', captcha_key=SMARTCAPTCHA_CLIENT_KEY, error=error)
 
@@ -167,7 +157,7 @@ def admin_login():
     if check_captcha(token):
         username = request.form['username']
         password = request.form['password']
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
+
         hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
         user = database.get_user_by_username(username)
 
@@ -196,15 +186,15 @@ def admin_panel(table, page=1, sort='updated', order='desc'):
     offset = (page - 1) * per_page
     search_query = request.args.get('search_query', '')
     columns = database.get_model_columns(table)
-<<<<<<< HEAD
+
     data, total, main_article = database.get_data_admin_panel(
         database.get_session(), table, search_query, sort, order, per_page, offset
     )
-=======
+
 
     data, total, main_article = database.get_data_admin_panel(table, search_query, sort, order,
                                                               per_page, offset)
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
+
     pagination = Pagination(page=page, per_page=per_page, total=total, record_name='items')
 
     return render_template('admin_panel.html', tables=table_names, table=table, columns=columns, data=data,
@@ -212,11 +202,10 @@ def admin_panel(table, page=1, sort='updated', order='desc'):
                            sort=sort, order=order, page=page)
 
 
-<<<<<<< HEAD
 @app.route('/logout')
-=======
+
 @app.route('/api/logout')
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
+
 def logout():
     resp = redirect(url_for("admin_login"))
     unset_jwt_cookies(resp)
@@ -273,10 +262,7 @@ def edit(id, table):
 def add_record(table):
     if request.method == 'POST':
         data = dict(request.form)
-<<<<<<< HEAD
 
-=======
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
         if 'file' in request.files:
             file = request.files['file']
             if file and verifyExt(file.filename):
@@ -286,15 +272,14 @@ def add_record(table):
 
         if 'content' in request.form:
             data['content'] = request.form['content']
-<<<<<<< HEAD
+
 
         if 'subtitle' in request.form:
             data['subtitle'] = request.form['subtitle']
 
-=======
         if 'subtitle' in request.form:
             data['subtitle'] = request.form['subtitle']
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
+
         if 'subtitle_arabian' in request.form:
             data['subtitle_arabian'] = request.form['subtitle_arabian']
 
@@ -326,7 +311,6 @@ def make_main(id):
         return redirect(url_for('admin_panel', table="news"))
 
 
-<<<<<<< HEAD
 @app.route('/uploads/<filename>')
 @jwt_required()
 def send_file(filename):
@@ -356,7 +340,5 @@ def upload_image():
         return jsonify({'success': False, 'error': 'Invalid file format'})
 
 
-=======
->>>>>>> 63204d1e204632b29b598887d1fc4253f7b83d81
 if __name__ == "__main__":
     app.run(port=5000, host="0.0.0.0", debug=True)
